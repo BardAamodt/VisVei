@@ -114,7 +114,7 @@
 			left: 0;
 			background-color: white;
 			border: 3px solid red;
-			visibility: visible;
+			visibility: hidden;
 			}
 	</style>	
 </head>
@@ -132,7 +132,7 @@
 <button type="button" id="inn" onclick="pluss(1)" ondblclick="pluss(2)" > + </button>
 <button type="button" id="ut" onclick="minus(1)" ondblclick="minus(2)" > - </button>
 <div id="info"></div>
-<script async defer src="https://maps.googleapis.com/maps/api/js?v=beta&key=AIzaSyDQ-1SpkoSXfLAIcDPIG_eYeC1Gc7S4CRY&libraries=geometry&loading=async&callback=initMap"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?v=beta&key=AIzaSyDQ-1SpkoSXfLAIcDPIG_eYeC1Gc7S4CRY&libraries=geometry&callback=initMap"></script>
 <script>
 //		var stedpos = {lat: 59.3610869, lng: 11.8386062 };	//Båstnes
 		var map;
@@ -196,17 +196,16 @@
 		stedIcon.strokeWeight = 10 / skala;
 		Pil.scale = 1 / skala;
 		Pil.strokeWeight = 2 / skala;
-document.getElementById("info").innerHTML = "<p>kompasskurs=" + kompasskurs;
-document.getElementById("info").innerHTML += "<p>skjermkurs=" + skjermkurs;
+//document.getElementById("info").innerHTML = "<p>kompasskurs=" + kompasskurs;
+//document.getElementById("info").innerHTML += "<p>skjermkurs=" + skjermkurs;
 		Pil.rotation = ( kompasskurs - skjermkurs) + kompasskurs;
-document.getElementById("info").innerHTML += "<p>sPil.rotation=" + Pil.rotation;
+//document.getElementById("info").innerHTML += "<p>sPil.rotation=" + Pil.rotation;
 		pilMerke.setIcon(Pil); 
 		dittMerke.setIcon(dittIcon); 
 		stedMerke.setIcon(stedIcon); 
 		}
 	
 	function initMap(){
- 	document.getElementById("info").innerHTML += "initMap start ";
 // 		stedpos = new google.maps.LatLng({lat: 59.458630, lng: 11.149560 });   //Skavland
  		dinpos = new google.maps.LatLng({lat: 59.4589678, lng: 11.149290 });   //Bryggerhuset
 		retning = 0;
@@ -356,13 +355,11 @@ document.getElementById("info").innerHTML += "<p>sPil.rotation=" + Pil.rotation;
 	function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 //		infoWindow.setPosition(pos);
 //		infoWindow.setContent(
-//		alert(
-document.getElementById("info").innerHTML += 
+		alert(
 			browserHasGeolocation
 				? "Error: The Geolocation service failed."
 				: "Error: Your browser doesn't support geolocation."
-		;
-//		);
+		);
 //		infoWindow.open(map);
 	}
 	function finnSted() {
