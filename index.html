@@ -1,564 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, shrink-to-fit=no,user-scalable=no">
-	<title>VisVeg</title>
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-		}
-		body {
-			height: 100vh;
-			width: 100vw;
-			overflow: hidden;
-			font-size: 100%;
-			margin: 0;
-			
-		}
-		button {
-			background-color: white;
-			text-align: center;
-			font-size: 20px;
-		}
-		#map {
-			position: absolute;
-			margin: auto;
-			border: 1px solid yellow; 
-			top: -50%;
-			left: -50%;
-			height: 200%;
-  			width: 200%;          
-		}
-		#inn {
-			position: absolute;
-			bottom: 50%;
-			right: 0;
-			border: 3px solid blue; 
-			height: 50px;
-			width: 50px;
-			font-size: 30px;
-			align-content: center;
-		}
-		#ut {
-			position: absolute;
-			top: 50%;
-			right: 0;
-			border: 3px solid blue;
-			height: 50px;
-			width: 50px;
-			font-size: 30px;
-			align-content: center;
-		}
-		#stedfelter {
-			position: absolute;
-			top: 0;
-			margin: auto;
-			height: 50px;
-			width: 100%;
-			display: flex;
-				justify-content: center;
-			}
-		#dinefelter {
-			position: absolute;
-			bottom: 0;
-			margin: auto;
-			height: 50px;
-			width: 100%;
-			display: flex;
-				justify-content: center;
-			}
-		#sted {
-			position: static;
-			height: 40px;
-			size: 20;
-			padding: 0px;
-			box-shadow: none;
-			font-size: 0.8em;
-			border: 2px solid black;
-			text-align:  right;
-			}
-		#finnsted {
-			position: static;
-			font-size: 0.8em;
-			border: 3px solid red;
-			height: 45px;
-			}
-		#retning {
-			position: static;
-			top: 0;
-			height: 40px;
-			line-height: 40px;;
-			font-size: 0.8em;
-			min-width: 120px;
-			background-color: white;
-			border: 2px solid black;
-			display: inline-block;
-			overflow: hidden;
-			}
-		#finnmeg {
-			position: static;
-			bottom: 0;
-			border: 3px solid blue;
-			height: 50px;
-			}
-		#finnretning {
-			position: static;
-			bottom: 0;
-			border: 3px solid blue;
-			height: 50px;
-			}
-		#info {
-			position: absolute;
-			top: 50px;
-			left: 0;
-			background-color: white;
-			border: 3px solid red;
-			visibility: visible;
-			}
-	</style>	
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compass Example</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 3em; }
+    #compass {
+      width: 200px; height: 200px;
+      border: 4px solid #333;
+      border-radius: 50%;
+      margin: 20px auto;
+      position: relative;
+    }
+    #needle {
+      width: 4px; height: 100px;
+      background: red;
+      position: absolute;
+      left: 50%; bottom: 50%;
+      transform-origin: bottom center;
+      transform: rotate(0deg);
+    }
+  </style>
 </head>
 <body>
-<div id="map"></div>
-<div id="stedfelter">
-<input type="text" id="sted" >
-<button type="button" id="finnsted" onclick="finnSted()"> Finn sted </button>
-<div id="retning"> </div>
-</div>
-<div id="dinefelter">
-<button type="button" id="finnmeg" onclick="finnMeg()"> Finn meg </button>
-<button type="button" id="finnretning" onclick="finnRetning()"> Finn retning til sted </button>
-</div>
-<button type="button" id="inn" onclick="pluss(1)" ondblclick="pluss(2)" > + </button>
-<button type="button" id="ut" onclick="minus(1)" ondblclick="minus(2)" > - </button>
-<div id="info"></div>
-<script async defer src="https://maps.googleapis.com/maps/api/js?v=beta&key=AIzaSyDQ-1SpkoSXfLAIcDPIG_eYeC1Gc7S4CRY&libraries=geometry&loading=async&callback=initMap"></script>
-<script>
-//		var stedpos = {lat: 59.3610869, lng: 11.8386062 };	//Båstnes
-		var map;
-		var stedpos;
-		var gpsPos;
-		var dinpos;   
-		var midtpos;
-		var nyStedPos;
-		var nullpos;
-		var	opptatt = false;
-		var avstand = 0;
-		var retning = 0;
-		var kartretning = 0;
-		var kartavstand16;
-		var synsfelt;
-		const avstIftSynsfelt = 0.6;
-		var skala = 1;
-		var skalering = 1;
-		var kompasskurs = 0;
-		var skjermkurs = 0;
-		var zindex = 0;
-		var HoldDinPos = false;
-		var StedPlassert = false;
-		var modus = "finnRetning";
-		var skritteller = 0;
-		var skritt;
-		var rute;
-		var Pil = {
-			  path:  'M -10,-100 -10,120 10,120 10,-100 0,-120  z',
-			  strokeColor: "yellow",
-			  strokeWeight: 3,
-			  scale: 1,
-			  rotation: 0,
-			  zIndex: 1,
-			};		
-		var stedIcon = {
-			  path: 	'M0,-25 C35,-25, 35,25, 0,25 C-35,25, -35,-25, 0,-25',
-			  strokeColor: "red",
-			  strokeWeight: 12,
-			  fillColor: "red",
-			  fillOpacity: 0,
-			  scale: 0.5,
-			  rotation: 0,
-			  zIndex: 1,
-			};		
-		var dittIcon = {
-			  path: 	'M0,-25 C35,-25, 35,25, 0,25 C-35,25, -35,-25, 0,-25',
-			  strokeColor: "dodgerblue",
-			  strokeWeight: 12,
-			  fillColor: "dodgerblue",
-			  fillOpacity: 0,
-			  scale: 0.5,
-			  rotation: 0,
-			  zIndex: 1,
-			};
-	
-	function tegnPil(){
-		dittIcon.scale = 0.5 / skala;
-		dittIcon.strokeWeight = 10 / skala;
-		stedIcon.scale = 0.5 / skala;
-		stedIcon.strokeWeight = 10 / skala;
-		Pil.scale = 1 / skala;
-		Pil.strokeWeight = 2 / skala;
-document.getElementById("info").innerHTML = "<p>kompasskurs=" + kompasskurs;
-document.getElementById("info").innerHTML += "<p>skjermkurs=" + skjermkurs;
-		Pil.rotation = ( kompasskurs - skjermkurs) + kompasskurs;
-document.getElementById("info").innerHTML += "<p>sPil.rotation=" + Pil.rotation;
-		pilMerke.setIcon(Pil); 
-		dittMerke.setIcon(dittIcon); 
-		stedMerke.setIcon(stedIcon); 
-		}
-	
-	function initMap(){
- 	document.getElementById("info").innerHTML += "initMap start ";
-// 		stedpos = new google.maps.LatLng({lat: 59.458630, lng: 11.149560 });   //Skavland
- 		dinpos = new google.maps.LatLng({lat: 59.4589678, lng: 11.149290 });   //Bryggerhuset
-		retning = 0;
-		map = new google.maps.Map(document.getElementById("map"), {
-			zoom: 16,
-			gestureHandling: "none",
-			center: dinpos,
-			mapTypeId: 'hybrid'
-		});
+  <h2>📱 Huawei P20 Pro Compass</h2>
+  <div id="compass"><div id="needle"></div></div>
+  <p id="heading">Heading: --°</p>
+  <button onclick="requestOrientationPermission()">Start Compass</button>
 
-		pilMerke = new google.maps.Marker({
-			icon: Pil,
-			draggable: false,
-			map: map
-		});
+  <script>
+    async function requestOrientationPermission() {
+      if (typeof DeviceOrientationEvent !== "undefined" &&
+          typeof DeviceOrientationEvent.requestPermission === "function") {
+        try {
+          const response = await DeviceOrientationEvent.requestPermission();
+          if (response === "granted") startCompass();
+          else alert("Permission denied for motion sensors.");
+        } catch (e) { alert(e); }
+      } else {
+        startCompass();
+      }
+    }
 
-		dittMerke = new google.maps.Marker({
-			icon: dittIcon,
-			draggable: true,
-			map: map
-		});
-  		dittMerke.setPosition(dinpos);
-		dittMerke.setZIndex(100);
-		
-		rute = new google.maps.Polyline({
-			path: skritt,
-			geodesic: true,
-			strokeColor: "dodgerblue",
-			strokeOpacity: 1.0,
-			strokeWeight: 2,
-            clickable: true
-		  });
-		rute.setMap(map);		
-		
-		stedMerke = new google.maps.Marker({
-			icon: stedIcon,
-			draggable: true,
-			map: map
-		});
-		stedMerke.setZIndex(100);
- 		infoWindow = new google.maps.InfoWindow();
-// Bind the functions...
-		window.addEventListener("deviceorientation", handleOrientation, true);
-		alert('Kalibrer kompasset! Beveg telefonen i 8-tall foran deg.');
-		google.maps.event.addListener(stedMerke,"dragstart", function (e) { stedMerke_init(e);});
-		google.maps.event.addListener(dittMerke,"dragstart", function (e) { dittMerke_init(e);});
-		google.maps.event.addListener(stedMerke,"drag", function (e) { stedMerke_move(e);});
-		google.maps.event.addListener(dittMerke,"drag", function (e) { dittMerke_move(e);});
-		google.maps.event.addListener(stedMerke,"dragend", function (e) { stedMerke_stop(e);});
-		google.maps.event.addListener(dittMerke,"dragend", function (e) { dittMerke_stop(e);});
-		google.maps.event.addListener(dittMerke,"click", function (e) { beregnLengde(e);});
-//  		Finn din gps posisjon() og vent på input;
-		oppdaterGpsPosisjon();
-//	console.log(
- 	document.getElementById("info").innerHTML += "Google Maps API version: " + google.maps.version;
-	}
-	function oppdaterGpsPosisjon() {
-		var options = {
-		  enableHighAccuracy: true,
-		  timeout: 5000,
-		  maximumAge: 0
-		};
-// 			alert( "før ny gpsPosisjon()" + dinpos);
+    function startCompass() {
+      window.addEventListener("deviceorientationabsolute", updateCompass, true);
+      window.addEventListener("deviceorientation", updateCompass, true);
+    }
 
-		// Try HTML5 geolocation.
-		if (navigator.geolocation) {
-		  navigator.geolocation.watchPosition(
-			(position) => {
-				if ( !HoldDinPos) {
-					gpsPos = new google.maps.LatLng( {
-									lat:	Number(position.coords.latitude),
-									lng:	Number(position.coords.longitude)
-					});
-					dinpos = gpsPos;
-					dittMerke.setPosition(dinpos);
-					lagSpor();
-					}
-				plasserStedfinnRetning();
-			},
-			() => {
-				plasserStedfinnRetning();
-				handleLocationError(true, infoWindow, map.getCenter());
-			},
-			options
-		  );
-		} else {
-		  // Browser doesn't support Geolocation
-			plasserStedfinnRetning();
-			handleLocationError(false, infoWindow, map.getCenter());
-		}
-	}
-	function lagSpor() {
-		skritt = rute.getPath();
-		let ant = skritt.push(dinpos);
-		if (ant > 100) {fjernSpor(2,ant - 5);}
-		if (ant == 1) {google.maps.event.addListener(rute, "click", function(e) {beregnLengde(e)});}
-//	document.getElementById("info").innerHTML = skritt.getLength();
-	}
-	function fjernSpor(fra, til) {
-		let min = 0;
-		let m = 0;
-		for (let i = fra; i < til; i++) {
-			let diff = Math.pow(google.maps.geometry.spherical.computeDistanceBetween(skritt.getAt(i - 1), skritt.getAt(i)) +
-							google.maps.geometry.spherical.computeDistanceBetween(skritt.getAt(i), skritt.getAt(i + 1)), 2) /
-							google.maps.geometry.spherical.computeDistanceBetween(skritt.getAt(i - 1), skritt.getAt(i + 1));
-			if ( min == 0 || diff < min) {
-				min = diff;
-				m = i;
-			}
-		}
-		skritt.removeAt(m);
-	}
-	function beregnLengde(event) {
-		skritt = rute.getPath();
-		let ant = skritt.getLength();
-		let lengde = 0;
-		for (let i = 1; i < ant - 1; i++) {
-			lengde += google.maps.geometry.spherical.computeDistanceBetween(skritt.getAt(i ), skritt.getAt(i + 1));
-			}
-		if (lengde<1000) {alert("Rutelengde= " + lengde.toFixed(0) + " m");
-		} else            {alert("Rutelengde= " + (lengde / 1000).toFixed(1) + " km");}
-	}
-	function plasserStedfinnRetning() {
-		if ( !StedPlassert) {
-//			const urlParams = new URLSearchParams(window.location.search);
-			const latlon = window.location.search.substring(1);
-			if (latlon) { stedpos = new google.maps.LatLng( latlon.split(',')[0], latlon.split(',')[1]); 
-			} else {
-//			stedpos = google.maps.geometry.spherical.computeOffset(dinpos, 100, 0);
-			stedpos = google.maps.geometry.spherical.computeOffset(dinpos, 100, skjermkurs);
-			}
-			stedMerke.setPosition(stedpos);
-			document.getElementById("sted").value = stedpos.lat().toPrecision(8) + "," + stedpos.lng().toPrecision(8);
-			StedPlassert = true;
-//		document.getElementById("info").innerHTML += "<p>map.getZoom()=" + map.getZoom();
-//		document.getElementById("info").innerHTML += "<p>mapavstand()=" + mapavstand();
-			kartavstand16 = mapavstand();
-		}
-		if (modus == "finnRetning") {
-			finnRetning();
-		}
-		if (modus == "finnMeg") {
-			map.setCenter(dinpos);
+    function updateCompass(event) {
+      let heading;
 
-		}
-	}
-	function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-//		infoWindow.setPosition(pos);
-//		infoWindow.setContent(
-//		alert(
-document.getElementById("info").innerHTML += 
-			browserHasGeolocation
-				? "Error: The Geolocation service failed."
-				: "Error: Your browser doesn't support geolocation."
-		;
-//		);
-//		infoWindow.open(map);
-	}
-	function finnSted() {
-		modus = "finnSted";
-		pilMerke.setVisible(false);
-		kartretning = 0;
-		document.getElementById("map").style.transform  = "scale(" + skala + ", " + skala + ")" + " rotate(" + (-kartretning) + "deg)" ;
-		gmlsted = stedpos.lat().toPrecision(8) + "," + stedpos.lng().toPrecision(8);
-		if ( !(document.getElementById("sted").value == gmlsted)) {
-			var latlng = document.getElementById("sted").value.split(",");
-			stedpos = new google.maps.LatLng(Number(latlng[0]),Number(latlng[1]));
-			document.getElementById("sted").value = stedpos.lat().toPrecision(8) + "," + stedpos.lng().toPrecision(8);
-		} 
-		map.setCenter(stedpos);
-		stedMerke.setPosition(stedpos);
-		beregnAvstand();
-	}
-	function finnMeg() {
-		modus = "finnMeg";
-		HoldDinPos = false;
-		pilMerke.setVisible(false);
-		kartretning = 0;
-		document.getElementById("map").style.transform  = "scale(" + skala + ", " + skala + ")" + " rotate(" + (-kartretning) + "deg)" ;
-		oppdaterGpsPosisjon();
-	}
+      if (event.absolute && event.alpha !== null) {
+        heading = event.alpha; // relative to magnetic north
+      } else if (event.webkitCompassHeading) {
+        heading = event.webkitCompassHeading; // iOS
+      } else if (event.alpha !== null) {
+        heading = event.alpha; // fallback, may not be true north
+      } else {
+        document.getElementById("heading").innerText = "No heading data.";
+        return;
+      }
 
-	function finnRetning() {
-//document.getElementById("info").innerHTML += "<p>=====  Start finnRetning()";
-		modus = "finnRetning";
-		if (!opptatt) {
-			opptatt = true;
-			beregnAvstand();
-			var lat = (stedpos.lat() + dinpos.lat()) / 2;
-			var lng = (stedpos.lng() + dinpos.lng()) / 2;
-			midtpos = new google.maps.LatLng( lat, lng);
-			pilMerke.setPosition(midtpos);
-			pilMerke.setVisible(true);
-			map.setCenter(midtpos);
-//			var zooming = Math.round(Math.log2(synsfelt()/avstand) - 1);
-			var zooming = Math.round(Math.log2(synsfelt()/avstand) - 1.2);
-			var nyzoom = map.getZoom() + zooming;
-//			document.getElementById("info").innerHTML += "<p> nyzoom= " + nyzoom;
-			if ( zooming == 0 ) {
-				skalerOgRoter();
-				opptatt = false;
-			} else {	
-	//			document.getElementById("info").innerHTML += "<p> Start zoom";
-//				skala = 1;
-//				document.getElementById("map").style.transform  = "scale(" + skala + ", " + skala + ")" + " rotate(" + 0 + "deg)" ;
-				google.maps.event.addListenerOnce(map,"tilesloaded", 
-					function (e) { 
-// 						alert("tilesloaded");
-						opptatt = false;
-						}
-				);
-				map.setZoom(nyzoom);
-				skalerOgRoter();
-			}
-		}
-		}
-		
-		
-	function skalerOgRoter() {
-		skalering = (avstIftSynsfelt * synsfelt()) / avstand;
-		skala = skalering;
-//	document.getElementById("info").innerHTML += "<p> skalering= " + skalering + ", skala= " + skala ;
-		kartretning = retning;
-		document.getElementById("map").style.transform  = "scale(" + skala + ", " + skala + ")" + " rotate(" + (-kartretning) + "deg)" ;
-		tegnPil();
-		}
-		
-		
-	function pluss( n) {
-		if ( modus == "finnRetning") {
-			midtpos = google.maps.geometry.spherical.computeOffset(dinpos, 
-						google.maps.geometry.spherical.computeDistanceBetween(dinpos, midtpos) / Math.pow(2, n), 
-							google.maps.geometry.spherical.computeHeading(dinpos, stedpos));
-			map.setCenter(midtpos);
-			pilMerke.setPosition(midtpos);
-		}
-		map.setZoom(map.getZoom() + n);
-		}
-	function minus( n) {
-		if ( modus == "finnRetning") {
-			midtpos = google.maps.geometry.spherical.computeOffset(dinpos, 
-						google.maps.geometry.spherical.computeDistanceBetween(dinpos, midtpos) * Math.pow(2, n), 
-							google.maps.geometry.spherical.computeHeading(dinpos, stedpos));
-			pilMerke.setPosition(midtpos);
-			map.setCenter(midtpos);
-		}
-		map.setZoom(map.getZoom() - n);
-		}
-		
-	function beregnAvstand() {
-		avstand = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(dinpos.lat(), dinpos.lng()), 
-																		new google.maps.LatLng(stedpos.lat(), stedpos.lng()));
-		var avstandtekst;
-		if (avstand<1000) {avstandtekst =	" " + avstand.toFixed(0) + "m";
-		} else            {avstandtekst =	" " + (avstand / 1000).toFixed(1) + "km";}
-	//	document.getElementById("avstand").value =	" " + avstand + " ";
-		retning = ( google.maps.geometry.spherical.computeHeading(
-						new google.maps.LatLng(dinpos.lat(), dinpos.lng()), 
-						new google.maps.LatLng(stedpos.lat(), stedpos.lng()))
-					);
-		kompasskurs = (360 + retning)% 360;
-		document.getElementById("retning").innerHTML =	"<b><mark><strong>" + avstandtekst + "</strong></mark></b>, " + kompasskurs.toFixed(0) + " grader nord";
-	}
-	function kartavstand() {
-		return kartavstand16 * Math.pow(2, 16 - map.getZoom());	
-	}
-	function synsfelt() {
-//			document.getElementById("info").innerHTML += "<p> kartavstand()= " + kartavstand() + " skala=" + skala;
-//		return (kartavstand()/2) / skala;	
-		return (kartavstand()/2);	
-	}
-	function mapavstand() {
-		var bounds = map.getBounds();
-		var ne = bounds.getNorthEast();
-		var sw = bounds.getSouthWest();
-		return google.maps.geometry.spherical.computeDistanceBetween(
-							new google.maps.LatLng(ne.lat(), ne.lng()), 
-							new google.maps.LatLng(sw.lat(), ne.lng()));
-	}
-	function sirkleinn( pos) {
-	    const cityCircle = new google.maps.Circle({
-		  strokeColor: "#FF0000",
-		  strokeOpacity: 0.8,
-		  strokeWeight: 2,
-		  fillColor: "#FF0000",
-		  fillOpacity: 0.05,
-		  map,
-		  center: pos,
-		  radius: 100,
-		});
-	}
+      // Convert to compass bearing (0° = north, clockwise)
+      heading = 360 - heading;
+      heading = (heading + 360) % 360;
 
-// For å håndtere dragging av markører
-var frapos;
-// Will be called when user starts dragging an element
-function stedMerke_init(e) {    
-frapos = e.latLng;
-stedMerke.setZIndex(dittMerke.getZIndex() + 1);
-e.stop();
-}
-function dittMerke_init(e) { 
-HoldDinPos = true;
-frapos = e.latLng;
-dittMerke.setZIndex(stedMerke.getZIndex() + 1);
-e.stop();
-}
-
-// Will be called when user dragging an element
-function stedMerke_move(e) {
-//document.getElementById("info").innerHTML += "<p>e.latLng=" + e.latLng;
-	stedpos = google.maps.geometry.spherical.computeOffset(frapos, 
-						google.maps.geometry.spherical.computeDistanceBetween(frapos, e.latLng) / skala, 
-							google.maps.geometry.spherical.computeHeading(frapos, e.latLng) + kartretning);
-	stedMerke.setPosition(stedpos);
-	document.getElementById("sted").value = stedpos.lat().toPrecision(8) + "," + stedpos.lng().toPrecision(8);
-	beregnAvstand();
-	e.stop();
-}
-function dittMerke_move(e) {
-	dinpos = google.maps.geometry.spherical.computeOffset(frapos, 
-						google.maps.geometry.spherical.computeDistanceBetween(frapos, e.latLng) / skala, 
-							google.maps.geometry.spherical.computeHeading(frapos, e.latLng) + kartretning);
-	dittMerke.setPosition(dinpos);
-	beregnAvstand();
-	e.stop();
-}// Will be called when user stop dragging an element
-function stedMerke_stop(e) {
-stedMerke.setPosition(google.maps.geometry.spherical.computeOffset(frapos, 
-						google.maps.geometry.spherical.computeDistanceBetween(frapos, e.latLng) / skala, 
-							google.maps.geometry.spherical.computeHeading(frapos, e.latLng) + kartretning));
-e.stop();
-}
-function dittMerke_stop(e) {
-	dittMerke.setPosition(google.maps.geometry.spherical.computeOffset(frapos, 
-							google.maps.geometry.spherical.computeDistanceBetween(frapos, e.latLng) / skala, 
-								google.maps.geometry.spherical.computeHeading(frapos, e.latLng) + kartretning));
-	lagSpor();	
-	e.stop();
-}
-// Destroy the object when we are done and remove event binds
-function _destroy() {
-}
-function handleOrientation(event) {
-// 	var absolute = event.absolute;
-	var alpha    = event.alpha;
-//	var beta     = event.beta;
-//	var gamma    = event.gamma;
-	const misvisning = 4.5;
-	skjermkurs = (360 - event.alpha + misvisning) % 360;
-	tegnPil();
-}
-
-</script>
+      // Rotate needle
+      document.getElementById("needle").style.transform = `rotate(${heading}deg)`;
+      document.getElementById("heading").innerText = `Heading: ${heading.toFixed(1)}°`;
+    }
+  </script>
 </body>
 </html>
