@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compass Example</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 3em; }
+    #compass {
+      width: 200px; height: 200px;
+      border: 4px solid #333;
+      border-radius: 50%;
+      margin: 20px auto;
+      position: relative;
+    }
+    #needle {
+      width: 4px; height: 100px;
+      background: red;
+      position: absolute;
+      left: 50%; bottom: 50%;
+      transform-origin: bottom center;
+      transform: rotate(0deg);
+    }
+  </style>
+</head>
+<body>
+  <h2>📱 Huawei P20 Pro Compass</h2>
+  <div id="compass"><div id="needle"></div></div>
+  <p id="heading">Heading: --°</p>
+  <button onclick="requestOrientationPermission()">Start Compass</button>
+
+  <script>
+    async function requestOrientationPermission() {
+      if (typeof DeviceOrientationEvent !== "undefined" &&
+          typeof DeviceOrientationEvent.requestPermission === "function") {
+        try {
+          const response = await DeviceOrientationEvent.requestPermission();
+          if (response === "granted") startCompass();
+          else alert("Permission denied for motion sensors.");
+        } catch (e) { alert(e); }
+      } else {
+        startCompass();
+      }
+    }
+
+    function startCompass() {
+      window.addEventListener("deviceorientationabsolute", updateCompass, true);
+      window.addEventListener("deviceorientation", updateCompass, true);
+    }
+
+    function updateCompass(event) {
+      let heading;
+
+      if (event.absolute && event.alpha !== null) {
+        heading = event.alpha; // relative to magnetic north
+      } else if (event.webkitCompassHeading) {
+        heading = event.webkitCompassHeading; // iOS
+      } else if (event.alpha !== null) {
+        heading = event.alpha; // fallback, may not be true north
+      } else {
+        document.getElementById("heading").innerText = "No heading data.";
+        return;
+      }
+
+      // Convert to compass bearing (0° = north, clockwise)
+      heading = 360 - heading;
+      heading = (heading + 360) % 360;
+
+      // Rotate needle
+      document.getElementById("needle").style.transform = `rotate(${heading}deg)`;
+      document.getElementById("heading").innerText = `Heading: ${heading.toFixed(1)}°`;
+    }
+  </script>
+</body>
+</html>
