@@ -196,10 +196,10 @@
 		stedIcon.strokeWeight = 10 / skala;
 		Pil.scale = 1 / skala;
 		Pil.strokeWeight = 2 / skala;
-//document.getElementById("info").innerHTML = "<p>kompasskurs=" + kompasskurs;
-//document.getElementById("info").innerHTML += "<p>skjermkurs=" + skjermkurs;
+document.getElementById("info").innerHTML = "<p>kompasskurs=" + kompasskurs;
+document.getElementById("info").innerHTML += "<p>skjermkurs=" + skjermkurs;
 		Pil.rotation = ( kompasskurs - skjermkurs) + kompasskurs;
-//document.getElementById("info").innerHTML += "<p>sPil.rotation=" + Pil.rotation;
+document.getElementById("info").innerHTML += "<p>sPil.rotation=" + Pil.rotation;
 		pilMerke.setIcon(Pil); 
 		dittMerke.setIcon(dittIcon); 
 		stedMerke.setIcon(stedIcon); 
