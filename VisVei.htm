@@ -248,7 +248,7 @@
 		stedMerke.setZIndex(100);
  		infoWindow = new google.maps.InfoWindow();
 // Bind the functions...
-		window.addEventListener("deviceorientation", handleOrientation, true);
+		window.addEventListener("deviceorientationabsolute", handleOrientation, true);
 		alert('Kalibrer kompasset! Beveg telefonen i 8-tall foran deg.');
 		google.maps.event.addListener(stedMerke,"dragstart", function (e) { stedMerke_init(e);});
 		google.maps.event.addListener(dittMerke,"dragstart", function (e) { dittMerke_init(e);});
@@ -558,4 +558,5 @@ function handleOrientation(event) {
 
 </script>
 </body>
+
 </html>
