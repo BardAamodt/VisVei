@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8" />
-  <title>Magnetisk misvisning</title>
+  <title>Magnetisk misvisning (WMM)</title>
   <style>
     body {
       font-family: sans-serif;
@@ -36,8 +36,8 @@
 
   <p id="result"></p>
 
-  <!-- ✅ Fungerende versjon av geomagnetism.js -->
-  <script src="https://cdn.jsdelivr.net/gh/naturalatlas/geomagnetism@master/geomagnetism.js"></script>
+  <!-- ✅ Fungerende og riktig MIME-type fra jsDelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/wmm-js@1.1.1/dist/wmm.min.js"></script>
 
   <script>
     document.getElementById("calcBtn").addEventListener("click", () => {
@@ -50,10 +50,9 @@
       }
 
       try {
-        // geomagnetism skal nå være definert globalt
-        const model = geomagnetism.model(new Date());
-        const point = model.point([lat, lon]);
-        const decl = point.decl;
+        // Beregn misvisning (declination) ved hjelp av WMM
+        const result = WMM.calculate(lat, lon, 0, new Date());
+        const decl = result.declination;
 
         document.getElementById("result").innerText =
           `Magnetisk misvisning: ${decl.toFixed(2)}°`;
