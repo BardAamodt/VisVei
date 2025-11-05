@@ -208,15 +208,6 @@
 	function initMap(){
 // 		stedpos = new google.maps.LatLng({lat: 59.458630, lng: 11.149560 });   //Skavland
  		dinpos = new google.maps.LatLng({lat: 59.4589678, lng: 11.149290 });   //Bryggerhuset
-
-const geomagnetism = require('geomagnetism');
-// If no date is passed, the current date is used
-const currentModel = geomagnetism.model();
-// Calculate information for a specific point (latitude, longitude)
-const info = currentModel.point([59.4589678, 11.149290]);
-//console.log('Declination (current date):', info.decl, 'degrees');
-document.getElementById("info").innerHTML += "Misvisning: " + info.decl ;
-
 		retning = 0;
 		map = new google.maps.Map(document.getElementById("map"), {
 			zoom: 16,
