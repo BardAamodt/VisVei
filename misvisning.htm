@@ -30,15 +30,15 @@
   <p>
     <label>Breddegrad (°N): <input id="lat" type="number" step="0.0001" value="59.9139"></label><br>
     <label>Lengdegrad (°Ø): <input id="lon" type="number" step="0.0001" value="10.7522"></label><br>
-    <button onclick="calc()">Beregn</button>
+    <button id="calcButton">Beregn</button>
   </p>
   <p id="result"></p>
 
-  <!-- Henter geomagnetism.js direkte fra CDN -->
-  <script src="https://cdn.jsdelivr.net/gh/naturalatlas/geomagnetism/geomagnetism.min.js"></script>
+  <!-- Last inn geomagnetism-biblioteket -->
+  <script src="https://unpkg.com/@cristianob/geomagnetism@0.2.0/dist/geomagnetism.min.js"></script>
 
   <script>
-    function calc() {
+    document.getElementById('calcButton').addEventListener('click', () => {
       const lat = parseFloat(document.getElementById('lat').value);
       const lon = parseFloat(document.getElementById('lon').value);
 
@@ -47,14 +47,18 @@
         return;
       }
 
-      // Oppretter modell basert på dagens dato
-      const model = geomagnetism.model(new Date());
-      const point = model.point([lat, lon]); // [lat, lon]
+      try {
+        const model = geomagnetism.model(new Date());
+        const info = model.point([lat, lon]);
+        const decl = info.decl;
 
-      const decl = point.decl; // misvisning i grader
-      document.getElementById('result').innerText =
-        `Magnetisk misvisning: ${decl.toFixed(2)}°`;
-    }
+        document.getElementById('result').innerText = 
+          `Magnetisk misvisning: ${decl.toFixed(2)}°`;
+      } catch (err) {
+        document.getElementById('result').innerText = "Error: " + err.message;
+      }
+    });
   </script>
 </body>
+</html>
 </html>
