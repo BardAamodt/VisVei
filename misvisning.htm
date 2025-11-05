@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Magnetisk misvisning</title>
   <style>
     body {
       font-family: sans-serif;
-      max-width: 500px;
+      max-width: 600px;
       margin: 2em auto;
       text-align: center;
     }
@@ -27,38 +27,41 @@
 </head>
 <body>
   <h1>Beregn magnetisk misvisning</h1>
+
   <p>
-    <label>Breddegrad (°N): <input id="lat" type="number" step="0.0001" value="59.9139"></label><br>
-    <label>Lengdegrad (°Ø): <input id="lon" type="number" step="0.0001" value="10.7522"></label><br>
-    <button id="calcButton">Beregn</button>
+    <label>Breddegrad (°N): <input id="lat" type="number" step="0.0001" value="59.9139"></label><br />
+    <label>Lengdegrad (°Ø): <input id="lon" type="number" step="0.0001" value="10.7522"></label><br />
+    <button id="calcBtn">Beregn</button>
   </p>
+
   <p id="result"></p>
 
-  <!-- Last inn geomagnetism-biblioteket -->
-  <script src="https://unpkg.com/@cristianob/geomagnetism@0.2.0/dist/geomagnetism.min.js"></script>
+  <!-- ✅ Fungerende versjon av geomagnetism.js -->
+  <script src="https://cdn.jsdelivr.net/gh/naturalatlas/geomagnetism@master/geomagnetism.js"></script>
 
   <script>
-    document.getElementById('calcButton').addEventListener('click', () => {
-      const lat = parseFloat(document.getElementById('lat').value);
-      const lon = parseFloat(document.getElementById('lon').value);
+    document.getElementById("calcBtn").addEventListener("click", () => {
+      const lat = parseFloat(document.getElementById("lat").value);
+      const lon = parseFloat(document.getElementById("lon").value);
 
       if (isNaN(lat) || isNaN(lon)) {
-        document.getElementById('result').innerText = "Ugyldige koordinater!";
+        document.getElementById("result").innerText = "Ugyldige koordinater!";
         return;
       }
 
       try {
+        // geomagnetism skal nå være definert globalt
         const model = geomagnetism.model(new Date());
-        const info = model.point([lat, lon]);
-        const decl = info.decl;
+        const point = model.point([lat, lon]);
+        const decl = point.decl;
 
-        document.getElementById('result').innerText = 
+        document.getElementById("result").innerText =
           `Magnetisk misvisning: ${decl.toFixed(2)}°`;
       } catch (err) {
-        document.getElementById('result').innerText = "Error: " + err.message;
+        console.error(err);
+        document.getElementById("result").innerText = "Feil: " + err.message;
       }
     });
   </script>
 </body>
-</html>
 </html>
